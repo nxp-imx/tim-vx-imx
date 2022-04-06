@@ -24,6 +24,8 @@
 #ifndef TIM_LAYOUT_INFER_ACTIVATION_LAYOUT_INFERENCE_H_
 #define TIM_LAYOUT_INFER_ACTIVATION_LAYOUT_INFERENCE_H_
 
+#include <algorithm>
+
 #include "tim/vx/ops/activations.h"
 
 #include "ops/op_layout_inference.h"
@@ -65,11 +67,29 @@ class PReluLayoutInfer : public OpLayoutInfer {
 
   void OnInputs(
       std::vector<std::shared_ptr<vx::Tensor>>& next_tensors) override {
-    ReverseInputsPermuteVector();
     auto src_input = op_->impl()->InputsTensor()[0];
     auto input_pv = context_->GetPermuteVector(src_input);
-    auto prelu = context_->infer_graph_->CreateOperation<vx::ops::Prelu>(
-        op_->impl()->node()->nn_param.prelu.axis);
+    auto src_slope = op_->impl()->InputsTensor()[1];
+    std::shared_ptr<tim::vx::Tensor> infer_slope;
+    if (input_pv->IsAligned()) {
+      infer_slope = context_->infer_graph_->CreateTensor(
+          src_slope->GetSpec(), src_slope->GetDataRef());
+    } else {
+      
+      auto new_spec = src_slope->GetSpec();
+      tim::vx::ShapeType s;
+      s.push_back(*(new_spec.shape_.end()-1));
+      new_spec.shape_ = s;
+      infer_slope = context_->infer_graph_->CreateTensor(
+          new_spec, src_slope->GetDataRef());
+    }
+    context_->UpdateTensorMap(src_slope, infer_slope);
+    context_->SetPermuteVector(src_slope,
+                               MakeShared(src_slope->GetShape().size()));
+
+    auto prelu =
+        context_->infer_graph_->CreateOperation<vx::ops::Prelu>(MapAxis(
+            input_pv->AsStdVec(), op_->impl()->node()->nn_param.prelu.axis));
     auto out_infer = CreateOutputsTensor(input_pv);
     for (const auto& i_src : op_->impl()->InputsTensor()) {
       (*prelu).BindInput(context_->GetMapedTensor(i_src));
