@@ -1,0 +1,35 @@
+NXP Software Content Register
+
+Release - TIM-VX 1.1.50 
+December 2022
+
+Outgoing License: MIT
+License in File: LICENSE
+
+Release branch: lf-5.15.71_2.2.0
+
+--------------------------------------------
+
+Package:                   tim-vx-imx.git
+Version:                   1.1.50
+Outgoing License:          MIT
+License File:              LICENSE
+Description and comments:  Tensor Interface Module for OpenVX
+Release Location:          https://source.codeaurora.org/external/imx/tim-vx-imx.git -b lf-5.15.71_2.2.0
+Origin:                    Verisilicon - https://github.com/VeriSilicon/TIM-VX
+                           
+--------------------------------------------
+
+Addtionally following packages are used at build time:
+
+--------------------------------------------
+
+Package:                   googletest.git
+Version:                   1.10.0
+Outgoing License:          BSD-3-Clause license 
+License File:              LICENSE
+Description and comments:  Google Test Framework
+Release Location:          public
+Origin:                    Google - https://github.com/google/googletest
+                           
+--------------------------------------------
