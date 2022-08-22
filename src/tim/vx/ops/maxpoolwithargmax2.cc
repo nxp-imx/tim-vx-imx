@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2022 Vivante Corporation
+*    Copyright (c) 2021 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -21,7 +21,7 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#include "tim/vx/ops/roi_pool.h"
+#include "tim/vx/ops/maxpoolwithargmax2.h"
 
 #include "direct_map_op_impl.h"
 #include "type_utils.h"
@@ -31,22 +31,32 @@ namespace tim {
 namespace vx {
 namespace ops {
 
-RoiPool::RoiPool(Graph* graph, PoolType type, float scale,
-                   const std::array<uint32_t, 2>& size)
-    : DirectMapOp(graph, VSI_NN_OP_ROI_POOL),
-      type_(type),
-      scale_(scale),
-      size_(size) {
-  this->impl()->node()->nn_param.roi_pool.type = TranslatePoolType(type);
-  this->impl()->node()->nn_param.roi_pool.scale = scale;
-  this->impl()->node()->nn_param.roi_pool.size[0] = size[0];
-  this->impl()->node()->nn_param.roi_pool.size[1] = size[1];
+MaxpoolWithArgmax2::MaxpoolWithArgmax2(Graph* graph, PadType padding,
+                                   const std::array<uint32_t, 2>& ksize,
+                                   const std::array<uint32_t, 2>& stride,
+                                   RoundType round_type,
+                                   DataLayout layout)
+    : DirectMapOp(graph, VSI_NN_OP_MAXPOOLWITHARGMAX, 1, 2, layout),
+      padding_(padding),
+      ksize_(ksize),
+      stride_(stride),
+      round_type_(round_type) {
+  this->impl()->node()->nn_param.pool.type = TranslatePoolType(PoolType::MAX);
+  this->impl()->node()->nn_param.pool.round_type =
+      TranslateRoundType(round_type_);
+  this->impl()->node()->nn_param.pool.ksize[0] = ksize_[0];
+  this->impl()->node()->nn_param.pool.ksize[1] = ksize_[1];
+  this->impl()->node()->nn_param.pool.stride[0] = stride_[0];
+  this->impl()->node()->nn_param.pool.stride[1] = stride_[1];
+  this->impl()->node()->nn_param.pool.pad_type = TranslatePadType(padding_);
+  this->SetRoundingPolicy(OverflowPolicy::SATURATE, RoundingPolicy::RTNE, round_type_);
 }
 
-std::shared_ptr<Operation> RoiPool::Clone(
+std::shared_ptr<Operation> MaxpoolWithArgmax2::Clone(
     std::shared_ptr<Graph>& graph) const {
-  return graph->CreateOperation<RoiPool>(
-      this->type_, this->scale_, this->size_);
+  return graph->CreateOperation<MaxpoolWithArgmax2>(
+      this->padding_, this->ksize_, this->stride_, this->round_type_,
+      this->impl_->layout_);
 }
 
 }  // namespace ops

@@ -23,57 +23,40 @@
 *****************************************************************************/
 #include "tim/vx/context.h"
 #include "tim/vx/graph.h"
-#include "tim/vx/ops/gather.h"
-
-#include "gtest/gtest.h"
+#include "tim/vx/ops/localresponsenormalization.h"
 #include "test_utils.h"
+#include "gtest/gtest.h"
 
-TEST(Gather, shape_5_3_2_2_int32_axis_1_batchdims_1) {
+TEST(localresponsenormalization, axis_0_shape_6_1_1_1_float) {
   auto ctx = tim::vx::Context::Create();
-
-  if (ctx->isClOnly()) GTEST_SKIP();
   auto graph = ctx->CreateGraph();
 
-  tim::vx::ShapeType in_shape({5, 3, 2, 2});
-  tim::vx::ShapeType indices_shape({2, 2, 2});
-  tim::vx::ShapeType out_shape({5, 2, 2, 2, 2});
-  tim::vx::TensorSpec input_spec(tim::vx::DataType::INT8, in_shape,
+  tim::vx::ShapeType io_shape({6, 1, 1, 1});
+  tim::vx::TensorSpec input_spec(tim::vx::DataType::FLOAT32, io_shape,
                                  tim::vx::TensorAttribute::INPUT);
-  tim::vx::TensorSpec indices_spec(tim::vx::DataType::INT32, indices_shape,
-                                   tim::vx::TensorAttribute::INPUT);
-  tim::vx::TensorSpec output_spec(tim::vx::DataType::INT8, out_shape,
+  tim::vx::TensorSpec output_spec(tim::vx::DataType::FLOAT32, io_shape,
                                   tim::vx::TensorAttribute::OUTPUT);
 
   auto input_tensor = graph->CreateTensor(input_spec);
-  auto indices_tensor = graph->CreateTensor(indices_spec);
   auto output_tensor = graph->CreateTensor(output_spec);
 
-  std::vector<int8_t> in_data = {
-      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
-      15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-      30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
-      45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
-  };
-  //The index value greater than rank-1 is regarded as rank-1
-  std::vector<int32_t> indices = {1, 0, 0, 1, 1, 0, 0, 1};
-  std::vector<int8_t> golden = {
-      5,  6,  7,  8,  9,  0,  1,  2,  3,  4,  0,  1,  2,  3,  4,  5,
-      6,  7,  8,  9,  20, 21, 22, 23, 24, 15, 16, 17, 18, 19, 15, 16,
-      17, 18, 19, 20, 21, 22, 23, 24, 35, 36, 37, 38, 39, 30, 31, 32,
-      33, 34, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 50, 51, 52, 53,
-      54, 45, 46, 47, 48, 49, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54};
+  std::vector<float> in_data = {-1.1, 0.6, 0.7, 1.2, -0.7, 0.1};
+  std::vector<float> golden = {-0.264926, 0.125109,  0.140112,
+                               0.267261,  -0.161788, 0.0244266};
 
-  EXPECT_TRUE(
-      input_tensor->CopyDataToTensor(in_data.data(), in_data.size()));
-  EXPECT_TRUE(
-      indices_tensor->CopyDataToTensor(indices.data(), indices.size() * 4));
-  auto op = graph->CreateOperation<tim::vx::ops::Gather>(1,1);
-  (*op).BindInputs({input_tensor, indices_tensor}).BindOutputs({output_tensor});
+  EXPECT_TRUE(input_tensor->CopyDataToTensor(in_data.data(),
+                                             in_data.size() * sizeof(float)));
+
+  int radius = 5;
+  float alpha = 4.0, beta = 0.5, bias = 9.0;
+  auto op = graph->CreateOperation<tim::vx::ops::LocalResponseNormalization>(
+      radius, alpha, beta, bias, 0);
+  (*op).BindInputs({input_tensor}).BindOutputs({output_tensor});
 
   EXPECT_TRUE(graph->Compile());
   EXPECT_TRUE(graph->Run());
 
-  std::vector<int8_t> output(golden.size());
+  std::vector<float> output(18);
   EXPECT_TRUE(output_tensor->CopyDataFromTensor(output.data()));
-  EXPECT_EQ(golden, output);
+  EXPECT_TRUE(ArraysMatch(golden, output, 1e-5f));
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2022 Vivante Corporation
+*    Copyright (c) 2021 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -21,54 +21,50 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#ifndef TIM_VX_OPS_ROI_ALIGN_H_
-#define TIM_VX_OPS_ROI_ALIGN_H_
-#include "tim/vx/direct_map_op.h"
+#ifndef TIM_VX_OPS_MAXPOOLGRAD_H_
+#define TIM_VX_OPS_MAXPOOLGRAD_H_
 
+#include "tim/vx/operation.h"
 namespace tim {
 namespace vx {
 namespace ops {
 
 /**
- * ## RoiAlign
+ * ## MaxpooGrad
  *
- * Select and scale the feature map of each region of interest to a unified output
- * size by average pooling sampling points from bilinear interpolation.
+ * Acquire the gradient of 2-D Max pooling operation's input tensor. \
+ * Like the tensorflow_XLA op SelectAndScatter, see https://tensorflow.google.cn/xla/operation_semantics?hl=en#selectandscatter.
  *
- * - output_height : specifying the output height of the output tensor.
- * - output_width : specifying the output width of the output tensor.
- * - height_ratio : specifying the ratio from the height of original image to the
- *   height of feature map.
- * - width_ratio : specifying the ratio from the width of original image to the
- *   width of feature map.
- * - height_sample_num :  specifying the number of sampling points in height dimension
- *   used to compute the output.
- * - width_sample_num :specifying the number of sampling points in width dimension
- *   used to compute the output.
+ * - padding : AUTO, VALID or SAME.
+ * - ksize : filter size.
+ * - stride : stride along each spatial axis.
+ * - round_type : CEILING or FLOOR.
+ * 
+ *  * Inputs:
+ * 
+ * - 0 : input tensor of 2-D Max pooling.
+ * - 1 : gradient of 2-D Max pooling output tensor.
  */
 
-class RoiAlign : public DirectMapOp {
+class MaxpoolGrad: public Operation {
  public:
-  RoiAlign(Graph* graph, int32_t output_height, int32_t output_width,
-            float height_ratio, float width_ratio, int32_t height_sample_num,
-            int32_t width_sample_num);
-
+  MaxpoolGrad(Graph* graph, PadType padding,
+              const std::array<uint32_t, 2>& ksize,
+              const std::array<uint32_t, 2>& stride,
+              RoundType round_type = RoundType::FLOOR,
+              DataLayout layout = DataLayout::WHCN);
   std::shared_ptr<Operation> Clone(
       std::shared_ptr<Graph>& graph) const override;
 
  protected:
-  int32_t output_height_;
-  int32_t output_width_;
-  float height_ratio_;
-  float width_ratio_;
-  int32_t height_sample_num_;
-  int32_t width_sample_num_;
+  const PadType padding_;
+  const std::array<uint32_t, 2> ksize_;
+  const std::array<uint32_t, 2> stride_;
+  const RoundType round_type_;
 };
-
-using ROI_Align = RoiAlign;
 
 }  // namespace ops
 }  // namespace vx
 }  // namespace tim
 
-#endif /* TIM_VX_OPS_ROI_ALIGN_H_ */
+#endif /*TIM_VX_OPS_MAXPOOLGRAD_H_*/

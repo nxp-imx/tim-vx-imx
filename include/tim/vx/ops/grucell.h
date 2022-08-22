@@ -21,54 +21,55 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#ifndef TIM_VX_OPS_ROI_ALIGN_H_
-#define TIM_VX_OPS_ROI_ALIGN_H_
+#ifndef TIM_VX_OPS_GRUCELL_H_
+#define TIM_VX_OPS_GRUCELL_H_
+
+#include <array>
 #include "tim/vx/direct_map_op.h"
+#include "vsi_nn_pub.h"
 
 namespace tim {
 namespace vx {
 namespace ops {
 
 /**
- * ## RoiAlign
+ * ## GRUCell
  *
- * Select and scale the feature map of each region of interest to a unified output
- * size by average pooling sampling points from bilinear interpolation.
- *
- * - output_height : specifying the output height of the output tensor.
- * - output_width : specifying the output width of the output tensor.
- * - height_ratio : specifying the ratio from the height of original image to the
- *   height of feature map.
- * - width_ratio : specifying the ratio from the width of original image to the
- *   width of feature map.
- * - height_sample_num :  specifying the number of sampling points in height dimension
- *   used to compute the output.
- * - width_sample_num :specifying the number of sampling points in width dimension
- *   used to compute the output.
+ * - num_units : dimensionality of the output space.
+ * - activation : Activation function to use.
+ * - recurrent_activation : Activation function to use for the recurrent step.
+ * - reset_after : whether to apply reset gate after or before matrix multiplication.
+ *   False = "before", True = "after".
  */
 
-class RoiAlign : public DirectMapOp {
+class GRUCell : public DirectMapOp {
  public:
-  RoiAlign(Graph* graph, int32_t output_height, int32_t output_width,
-            float height_ratio, float width_ratio, int32_t height_sample_num,
-            int32_t width_sample_num);
+  enum ActivationType {
+    kNONE = 0,
+    kRELU = 1,
+    kRELU6 = 3,
+    kTANH = 4,
+    kSIGMOID = 6,
+    kHARDSIGMOID = 31, /* temporary use 31 */
+  };
+
+  GRUCell(Graph* graph, uint32_t num_units,
+          ActivationType activation = ActivationType::kTANH,
+          ActivationType recurrent_activation = ActivationType::kSIGMOID,
+          vsi_bool reset_after = TRUE);
 
   std::shared_ptr<Operation> Clone(
       std::shared_ptr<Graph>& graph) const override;
 
  protected:
-  int32_t output_height_;
-  int32_t output_width_;
-  float height_ratio_;
-  float width_ratio_;
-  int32_t height_sample_num_;
-  int32_t width_sample_num_;
+  const uint32_t num_units_;
+  const ActivationType activation_;
+  const ActivationType recurrent_activation_;
+  const int32_t reset_after_;
 };
-
-using ROI_Align = RoiAlign;
 
 }  // namespace ops
 }  // namespace vx
 }  // namespace tim
 
-#endif /* TIM_VX_OPS_ROI_ALIGN_H_ */
+#endif /* TIM_VX_OPS_GRUCELL_H_ */

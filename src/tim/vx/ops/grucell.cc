@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2020 Vivante Corporation
+*    Copyright (c) 2022 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -21,28 +21,33 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#ifndef TIM_VX_CONTEXT_H_
-#define TIM_VX_CONTEXT_H_
-
-#include <memory>
+#include "tim/vx/ops/grucell.h"
+#include "direct_map_op_impl.h"
+#include "type_utils.h"
+#include "vsi_nn_pub.h"
 
 namespace tim {
 namespace vx {
+namespace ops {
+GRUCell::GRUCell(Graph* graph, uint32_t num_units, ActivationType activation,
+                 ActivationType recurrent_activation, vsi_bool reset_after)
+    : DirectMapOp(graph, VSI_NN_OP_GRUCELL),
+      num_units_(num_units),
+      activation_(activation),
+      recurrent_activation_(recurrent_activation),
+      reset_after_(reset_after) {
+  this->impl()->node()->nn_param.grucell.num_units = num_units;
+  this->impl()->node()->nn_param.grucell.activation = activation;
+  this->impl()->node()->nn_param.grucell.recurrent_activation = recurrent_activation;
+  this->impl()->node()->nn_param.grucell.reset_after = reset_after;
+}
 
-class CompileOption;
-class Graph;
-class Context {
- public:
-  virtual ~Context() {}
-  virtual std::shared_ptr<Graph> CreateGraph() = 0;
-  virtual std::shared_ptr<Graph> CreateGraph(const CompileOption& options) = 0;
+std::shared_ptr<Operation> GRUCell::Clone(std::shared_ptr<Graph>& graph) const {
+  return graph->CreateOperation<GRUCell>(this->num_units_, this->activation_,
+                                         this->recurrent_activation_,
+                                         this->reset_after_);
+}
 
-  virtual bool isClOnly() = 0;
-
-  static std::shared_ptr<Context> Create();
-};
-
+}  // namespace ops
 }  // namespace vx
 }  // namespace tim
-
-#endif /* TIM_VX_CONTEXT_H_ */

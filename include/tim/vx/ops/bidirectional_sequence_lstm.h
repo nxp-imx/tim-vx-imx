@@ -21,54 +21,47 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#ifndef TIM_VX_OPS_ROI_ALIGN_H_
-#define TIM_VX_OPS_ROI_ALIGN_H_
-#include "tim/vx/direct_map_op.h"
+#ifndef TIM_VX_OPS_BIDIRECTIONAL_SEQUENCE_LSTM_H_
+#define TIM_VX_OPS_BIDIRECTIONAL_SEQUENCE_LSTM_H_
 
+#include "tim/vx/operation.h"
 namespace tim {
 namespace vx {
 namespace ops {
 
-/**
- * ## RoiAlign
- *
- * Select and scale the feature map of each region of interest to a unified output
- * size by average pooling sampling points from bilinear interpolation.
- *
- * - output_height : specifying the output height of the output tensor.
- * - output_width : specifying the output width of the output tensor.
- * - height_ratio : specifying the ratio from the height of original image to the
- *   height of feature map.
- * - width_ratio : specifying the ratio from the width of original image to the
- *   width of feature map.
- * - height_sample_num :  specifying the number of sampling points in height dimension
- *   used to compute the output.
- * - width_sample_num :specifying the number of sampling points in width dimension
- *   used to compute the output.
- */
-
-class RoiAlign : public DirectMapOp {
+class BidirectionalSequenceLstm : public Operation {
  public:
-  RoiAlign(Graph* graph, int32_t output_height, int32_t output_width,
-            float height_ratio, float width_ratio, int32_t height_sample_num,
-            int32_t width_sample_num);
+  enum ActivationType {
+    kNONE = 0,
+    kRELU = 1,
+    kRELU1 = 2,
+    kRELU6 = 3,
+    kTANH = 4,
+    kSIGMOID = 6,
+    kHARDSIGMOID = 31, /* temporary use 31 */
+  };
+  BidirectionalSequenceLstm(
+          Graph* graph, float cell_clip, float proj_clip,
+          ActivationType act_type, float forget_bias, bool time_major = false,
+          ActivationType recurrent_act_type = ActivationType::kSIGMOID,
+          bool return_sequences = false /*False: only return last state*/
+      );
 
   std::shared_ptr<Operation> Clone(
       std::shared_ptr<Graph>& graph) const override;
 
  protected:
-  int32_t output_height_;
-  int32_t output_width_;
-  float height_ratio_;
-  float width_ratio_;
-  int32_t height_sample_num_;
-  int32_t width_sample_num_;
+  const float cell_clip_;
+  const float proj_clip_;
+  const ActivationType act_type_;
+  const float forget_bias_;
+  const bool time_major_;
+  const ActivationType recurrent_act_type_;
+  const bool return_sequences_;
 };
-
-using ROI_Align = RoiAlign;
 
 }  // namespace ops
 }  // namespace vx
 }  // namespace tim
 
-#endif /* TIM_VX_OPS_ROI_ALIGN_H_ */
+#endif /* TIM_VX_OPS_BIDIRECTIONAL_SEQUENCE_LSTM_H_ */
