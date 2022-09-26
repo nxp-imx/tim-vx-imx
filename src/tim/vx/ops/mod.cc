@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2021 Vivante Corporation
+*    Copyright (c) 2022 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -21,16 +21,25 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#include "tim/vx/direct_map_op.h"
+#ifdef VSI_FEAT_OP_MOD
+#include "tim/vx/ops/mod.h"
 
-#include "direct_map_op_impl.h"
-
+#include "builtin_op_impl.h"
+#include "vsi_nn_pub.h"
 namespace tim {
 namespace vx {
-DirectMapOp::DirectMapOp(Graph* graph, uint32_t kind, int in_cnt, int out_cnt,
-                         DataLayout layout) {
-  impl_ = std::make_unique<DirectMapOpImpl>(graph, kind, in_cnt, out_cnt, layout);
+namespace ops {
+
+Mod::Mod(Graph* graph, int32_t fmod)
+    : BuiltinOp(graph, VSI_NN_OP_MOD),  fmod_(fmod) {
+  this->impl()->node()->nn_param.mod.fmod = fmod_;
 }
 
+std::shared_ptr<Operation> Mod::Clone(std::shared_ptr<Graph>& graph) const {
+  return graph->CreateOperation<Mod>(this->fmod_);
+}
+
+}  // namespace ops
 }  // namespace vx
 }  // namespace tim
+#endif //(VSI_FEAT_OP_MOD)

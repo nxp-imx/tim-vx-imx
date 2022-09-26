@@ -21,13 +21,13 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#if VSI_FEAT_OP_MAXPOOLWITHARGMAX
+#ifdef VSI_FEAT_OP_MAXPOOLWITHARGMAX
 #ifndef TIM_VX_OPS_MAXPOOLWITHARGMAX2_H_
 #define TIM_VX_OPS_MAXPOOLWITHARGMAX2_H_
 
 #include <array>
 
-#include "tim/vx/direct_map_op.h"
+#include "tim/vx/builtin_op.h"
 #include "tim/vx/types.h"
 
 namespace tim {
@@ -45,7 +45,7 @@ namespace ops {
  * - round_type : CEILING or FLOOR.
  */
 
-class MaxpoolWithArgmax2 : public DirectMapOp {
+class MaxpoolWithArgmax2 : public BuiltinOp {
  public:
   MaxpoolWithArgmax2(Graph* graph, PadType padding,
          const std::array<uint32_t, 2>& ksize,

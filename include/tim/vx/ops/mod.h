@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2020 Vivante Corporation
+*    Copyright (c) 2022 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -21,29 +21,41 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#include "tim/vx/ops/space2depth.h"
+#ifdef VSI_FEAT_OP_MOD
+#ifndef TIM_VX_OPS_MOD_H_
+#define TIM_VX_OPS_MOD_H_
 
-#include "builtin_op_impl.h"
-#include "vsi_nn_pub.h"
-
+#include "tim/vx/builtin_op.h"
 namespace tim {
 namespace vx {
 namespace ops {
 
-SpaceToDepth::SpaceToDepth(Graph* graph, std::vector<int> block_size,
-                           DataLayout layout)
-    : BuiltinOp(graph, VSI_NN_OP_SPACE2DEPTH, 0, 0, layout),
-      block_size_(block_size) {
-  this->impl()->node()->nn_param.space2depth.block_size[0] = block_size_[0];
-  this->impl()->node()->nn_param.space2depth.block_size[1] = block_size_[1];
-}
+/**
+ * ## Mod
+ *
+ * Mod performs element-wise binary modulus. 
+ * The sign of the remainder is the same as that of the Divisor as default.
+ *
+ * Mod operator can also behave like C fmod() or numpy.fmod when input type is floating 
+ * point. The sign of the remainder however, will be the same as the Dividend. Attribute
+ * fmod is set to decide the mod behivior.
+ *
+ * - fmod : If the input type is floating point, then fmod must be set to 1.Default = 0
+ * means integer mod.
+ */
 
-std::shared_ptr<Operation> SpaceToDepth::Clone(
-    std::shared_ptr<Graph>& graph) const {
-  return graph->CreateOperation<SpaceToDepth>(this->block_size_,
-                                              this->impl_->layout_);
-}
+class Mod : public BuiltinOp {
+ public:
+  Mod(Graph* Graph, int32_t fmod = 0);
+  std::shared_ptr<Operation> Clone(std::shared_ptr<Graph>& graph) const override;
+  
+ protected:
+  int32_t fmod_;
+};
 
 }  // namespace ops
 }  // namespace vx
 }  // namespace tim
+
+#endif /* TIM_VX_OPS_MOD_H_ */
+#endif  //(VSI_FEAT_OP_MOD) 
