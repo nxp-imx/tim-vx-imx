@@ -15,7 +15,7 @@ Version:                   1.1.50
 Outgoing License:          MIT
 License File:              LICENSE
 Description and comments:  Tensor Interface Module for OpenVX
-Release Location:          https://source.codeaurora.org/external/imx/tim-vx-imx.git -b lf-5.15.71_2.2.0
+Release Location:          https://github.com/nxp-imx/tim-vx-imx -b lf-5.15.71_2.2.0
 Origin:                    Verisilicon - https://github.com/VeriSilicon/TIM-VX
                            
 --------------------------------------------
