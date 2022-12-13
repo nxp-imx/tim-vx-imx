@@ -21,13 +21,14 @@
 *    DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-#ifdef VSI_FEAT_OP_MAXPOOLWITHARGMAX
-
 #ifndef TIM_VX_OPS_MAXPOOLGRAD_H_
 #define TIM_VX_OPS_MAXPOOLGRAD_H_
 
 #include "tim/vx/operation.h"
 #include <array>
+
+#ifdef VSI_FEAT_OP_MAXPOOLWITHARGMAX
+
 namespace tim {
 namespace vx {
 namespace ops {
@@ -36,7 +37,8 @@ namespace ops {
  * ## MaxpooGrad
  *
  * Acquire the gradient of 2-D Max pooling operation's input tensor. \
- * Like the tensorflow_XLA op SelectAndScatter, see https://tensorflow.google.cn/xla/operation_semantics?hl=en#selectandscatter.
+ * Like the tensorflow_XLA op SelectAndScatter, see \
+ * https://tensorflow.google.cn/xla/operation_semantics?hl=en#selectandscatter.
  *
  * - padding : AUTO, VALID or SAME.
  * - ksize : filter size.
@@ -47,6 +49,10 @@ namespace ops {
  * 
  * - 0 : input tensor of 2-D Max pooling.
  * - 1 : gradient of 2-D Max pooling output tensor.
+ * 
+ * * Outputs:
+ * 
+ * - 0 : updated tensor of 2-D Max pooling input.
  */
 
 class MaxpoolGrad: public Operation {
@@ -70,5 +76,5 @@ class MaxpoolGrad: public Operation {
 }  // namespace vx
 }  // namespace tim
 
-#endif /*TIM_VX_OPS_MAXPOOLGRAD_H_*/
-#endif
+#endif //(VSI_FEAT_OP_MAXPOOLWITHARGMAX)
+#endif /* TIM_VX_OPS_MAXPOOLGRAD_H_ */
