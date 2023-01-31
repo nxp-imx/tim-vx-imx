@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2021 Vivante Corporation
+*    Copyright (c) 2020-2023 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -41,12 +41,12 @@ GroupedConv2d::GroupedConv2d(Graph* graph,
       padding_(padding), strides_(strides), dilation_(dilation),
       pad_({0,0,0,0}), group_number_(group_number),
       kernel_layout_(kernel_layout) {
-  this->impl()->node()->nn_param.conv2d.stride[0] = strides_[0];
-  this->impl()->node()->nn_param.conv2d.stride[1] = strides_[1];
-  this->impl()->node()->nn_param.conv2d.pad_type = TranslatePadType(padding_);
-  this->impl()->node()->nn_param.conv2d.group = group_number_;
-  this->impl()->node()->nn_param.conv2d.dilation[0] = dilation_[0];
-  this->impl()->node()->nn_param.conv2d.dilation[1] = dilation_[1];
+  this->impl()->node()->nn_param.grouped_conv2d.stride[0] = strides_[0];
+  this->impl()->node()->nn_param.grouped_conv2d.stride[1] = strides_[1];
+  this->impl()->node()->nn_param.grouped_conv2d.pad_type = TranslatePadType(padding_);
+  this->impl()->node()->nn_param.grouped_conv2d.group = group_number_;
+  this->impl()->node()->nn_param.grouped_conv2d.dilation[0] = dilation_[0];
+  this->impl()->node()->nn_param.grouped_conv2d.dilation[1] = dilation_[1];
   }
 
 GroupedConv2d::GroupedConv2d(Graph* graph,
@@ -71,9 +71,15 @@ GroupedConv2d::GroupedConv2d(Graph* graph,
 
 std::shared_ptr<Operation> GroupedConv2d::Clone(
     std::shared_ptr<Graph>& graph) const {
-  return graph->CreateOperation<GroupedConv2d>(
-      this->pad_, this->strides_, this->dilation_, this->group_number_,
-      this->impl_->layout_, this->kernel_layout_);
+  if(this->padding_ == PadType::AUTO){
+    return graph->CreateOperation<GroupedConv2d>(
+            this->pad_, this->strides_, this->dilation_, this->group_number_,
+            this->impl_->layout_, this->kernel_layout_);
+  } else {
+    return graph->CreateOperation<GroupedConv2d>(
+            this->padding_, this->strides_, this->dilation_, this->group_number_,
+            this->impl_->layout_, this->kernel_layout_);
+  }
 }
 
 }  // namespace ops

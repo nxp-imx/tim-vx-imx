@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2020 Vivante Corporation
+*    Copyright (c) 2020-2023 Vivante Corporation
 *
 *    Permission is hereby granted, free of charge, to any person obtaining a
 *    copy of this software and associated documentation files (the "Software"),
@@ -62,6 +62,8 @@
 #include "tim/vx/ops/nbg.h"
 #include "tim/vx/ops/onehot.h"
 #include "tim/vx/ops/pad.h"
+#include "tim/vx/ops/pad_v2.h"
+#include "tim/vx/ops/pool1d.h"
 #include "tim/vx/ops/pool2d.h"
 #include "tim/vx/ops/reduce.h"
 #include "tim/vx/ops/relational_operations.h"

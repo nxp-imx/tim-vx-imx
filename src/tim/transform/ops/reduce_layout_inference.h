@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *    Copyright (c) 2020 Vivante Corporation
+ *    Copyright (c) 2020-2023 Vivante Corporation
  *
  *    Permission is hereby granted, free of charge, to any person obtaining a
  *    copy of this software and associated documentation files (the "Software"),
@@ -89,6 +89,7 @@ using ReduceAnyLayoutInfer = ReduceLayoutInfer<tim::vx::ops::ReduceAny>;
 using ReduceProdLayoutInfer = ReduceLayoutInfer<tim::vx::ops::ReduceProd>;
 using ReduceMeanLayoutInfer = ReduceLayoutInfer<tim::vx::ops::ReduceMean>;
 using ReduceSumLayoutInfer = ReduceLayoutInfer<tim::vx::ops::ReduceSum>;
+using ReduceAllLayoutInfer = ReduceLayoutInfer<tim::vx::ops::ReduceAll>;
 }  // namespace transform
 }  // namespace tim
 

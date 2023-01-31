@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *    Copyright (c) 2020 Vivante Corporation
+ *    Copyright (c) 2020-2023 Vivante Corporation
  *
  *    Permission is hereby granted, free of charge, to any person obtaining a
  *    copy of this software and associated documentation files (the "Software"),
@@ -42,6 +42,7 @@
 #include "ops/space2batch_layout_inference.h"
 #include "ops/batch2space_layout_inference.h"
 #include "ops/pad_layout_inference.h"
+#include "ops/pad_v2_layout_inference.h"
 #include "ops/reduce_layout_inference.h"
 #include "ops/fullyconnected_layout_inference.h"
 #include "ops/resize_layout_inference.h"
@@ -180,6 +181,7 @@ void LayoutInferContext::UpdateGraphOutputMap(const std::shared_ptr<vx::Tensor>&
       REGIST_LAYOUT_INFERENCE(VSI_NN_REDUCE_PROD, ReduceProd);                 \
       REGIST_LAYOUT_INFERENCE(VSI_NN_REDUCE_ANY, ReduceAny);                   \
       REGIST_LAYOUT_INFERENCE(VSI_NN_REDUCE_SUM, ReduceSum);                   \
+      REGIST_LAYOUT_INFERENCE(VSI_NN_REDUCE_ALL, ReduceAll);                   \
     default:                                                                   \
       VSILOGW("Op %d: Default layout inference pass for reduce.", reduce_type);\
       assert(false);                                                           \
@@ -248,6 +250,7 @@ std::vector<std::shared_ptr<vx::Tensor>> HandleLayoutInfer(
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_SPACE2BATCH, Space2Batch);
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_BATCH2SPACE, Batch2Space);
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_PAD, Pad);
+    REGIST_LAYOUT_INFERENCE(VSI_NN_OP_PAD2, PadV2);
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_FCL2, FullyConnected);
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_RESIZE, Resize);
     REGIST_LAYOUT_INFERENCE(VSI_NN_OP_SPLIT, Split);
@@ -325,7 +328,7 @@ LayoutInference(
   }
 
   while (!tensor_queue.empty()) {
-    const auto& tensor = tensor_queue.front();
+    auto tensor = tensor_queue.front();
     tensor_queue.pop_front();
     const auto& consumers = src_graph->GetConsumersOp(tensor);
     for (const auto& op : consumers) {
