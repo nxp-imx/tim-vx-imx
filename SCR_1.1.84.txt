@@ -1,0 +1,35 @@
+NXP Software Content Register
+
+Release - TIM-VX 1.1.84
+September 2023
+
+Outgoing License: MIT
+License in File: LICENSE
+
+Release branch: lf-6.1.36_2.1.0
+
+--------------------------------------------
+
+Package:                   tim-vx-imx.git
+Version:                   1.1.84
+Outgoing License:          MIT
+License File:              LICENSE
+Description and comments:  Tensor Interface Module for OpenVX
+Release Location:          https://github.com/nxp-imx/tim-vx-imx -b lf-6.1.36_2.1.0
+Origin:                    Verisilicon (MIT) - https://github.com/VeriSilicon/TIM-VX
+                           
+--------------------------------------------
+
+Build Dependencies:
+
+--------------------------------------------
+
+Package:                   googletest.git
+Version:                   1.12.0
+Outgoing License:          BSD-3-Clause license 
+License File:              LICENSE
+Description and comments:  Google Test Framework
+Release Location:          public
+Origin:                    Google - https://github.com/google/googletest
+                           
+--------------------------------------------
