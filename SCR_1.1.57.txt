@@ -20,7 +20,7 @@ Origin:                    Verisilicon (MIT) - https://github.com/VeriSilicon/TI
                            
 --------------------------------------------
 
-Addtionally following packages are used at build time:
+Build Dependencies:
 
 --------------------------------------------
 
